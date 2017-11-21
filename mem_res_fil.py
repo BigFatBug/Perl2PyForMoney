@@ -46,7 +46,7 @@ class Handler:
             mtemp = re.match('(\d+)D', datas[5])
             if mtemp:
                 for i in mtemp:
-                   mid.replace('')
+                   mid.replace('', '')
 
 
 
