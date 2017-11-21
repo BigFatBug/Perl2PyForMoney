@@ -46,24 +46,18 @@ class Handler:
             return False
         if int(datas[1]) > 2000:
             self.result['Mul'] += 1
-            return
-        temp = re.match(r'(\d+)[HS]', datas[5])
-        if temp:
-            for i in temp.groups():
-                nhs += int(i)
-        temp = re.match(r'(\d+)[MISH]', datas[5])
-        if temp:
-            for i in temp.groups():
-                len += int(i)
+            return False
+        for i in re.findall(r'(\d+)[HS]', datas[5]):
+            nhs += int(i)
+        for i in re.findall(r'(\d+)[MISH]', datas[5]):
+            len += int(i)
         temp = re.match(r'MD:.:(.+)', datas[12]) or re.match(r'MD:.:(.+)', datas[13])
         if temp:
             mid = temp.group()
-            mtemp = re.match(r'(\d+)D', datas[5])
-            if mtemp:
-                for mi in mtemp.groups():
-                    re.sub(r'[ATCG]{%s}' % mi, '', mid)
-                re.sub(r'\d+', '', mid)
-                nmi = len(mid)
+            for i in re.findall(r'(\d+)D', datas[5]):
+                re.sub(r'[ATCG]{%s}' % i, '', mid)
+            re.sub(r'\d+', '', mid)
+            nmi = len(mid)
 
         if nhs / len > self.splice:
             self.result['Spl'] += 1
@@ -85,35 +79,35 @@ class Handler:
                 self.result['Too'] / self.read * 100))
 
 
-def main(argv):
-    inputFile = 'test.bwa.sam'
-    outputFile = 'test.q.sam'
-    logFile = 'log'
+def main():
+    inputFile = ''
+    outputFile = ''
+    logFile = ''
     qua = 5
     lim = 5
     splice = 0.1
     try:
-        opts, args = getopt.getopt(argv, "hi:o:", ["ifile=", "ofile="])
+        opts, args = getopt.getopt(sys.argv[1:], "hi:o:l:Q:L:S")
         for opt, arg in opts:
             if opt == '-h':
                 print('input param: -i <inputfile> -o <outputfile> -l <logfile>')
                 sys.exit()
-            elif opt in ("-i", "--ifile"):
+            elif opt == '-i':
                 inputFile = arg
-            elif opt in ("-o", "--ofile"):
+            elif opt == '-o':
                 outputFile = arg
-            elif opt in ("-l", "--lfile"):
+            elif opt == '-l':
                 logFile = arg
-            elif opt in ("--qua", "-Q"):
+            elif opt == '-Q':
                 qua = int(arg)
-            elif opt in ("--lim", "-L"):
+            elif opt == '-L':
                 lim = int(arg)
-            elif opt in ("--splice", "-S"):
+            elif opt == '-S':
                 splice = float(arg)
     except Exception as e:
         print(e)
-        # sys.exit(2)
+        sys.exit(2)
     Handler(inputFile, outputFile, logFile, qua, lim, splice).run()
 
 if __name__ == '__main__':
-    main(sys.argv)
+    main()
